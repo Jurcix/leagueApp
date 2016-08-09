@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var buildSchema = new Schema({
-    name: {type: String, required:true},
+    name: {type: String, required:true, unique:true},
     username:{type: String, required:true},
     items: {type: Array, required:true},
     patch: Number,
