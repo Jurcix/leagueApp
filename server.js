@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var config = require('./config');
 var Build = require('./models/builds');
+var User = require('./models/users');
 var jwt = require('jsonwebtoken');
 
 mongoose.connect(config.database);
@@ -18,14 +19,18 @@ var router = express.Router();
 
 router.use(function (req, res, next) {
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
-
+console.log(token);
     if (token) {
+
+        var decoded = jwt.decode(token, {complete: true});
+        console.log(decoded.payload._doc._id);
+
         // verifies secret and checks exp
         jwt.verify(token, app.get('superSecret'), function (err, decoded) {
             if (err) {
                 return res.status(403).send({
                     success: false,
-                    message: 'Failed to authenticate token.',
+                    message: 'Failed to authenticate token.' + token,
                     error: err
                 });
             } else {
@@ -66,6 +71,7 @@ router.get('/', function (req, res) {
 });
 
 require('./rest/builds.rest.js')(router, Build);
+require('./rest/users.rest.js')(router, User);
 
 router.post('/login', function (req, res) {
     User.findOne({
@@ -88,7 +94,7 @@ router.post('/login', function (req, res) {
                 // if user is found and password is right
                 // create a token
                 var token = jwt.sign(user, app.get('superSecret'), {
-                    expiresIn: 60 * 60 * 72 // expires in 24 hours
+                    expiresIn: 60 * 60 * 24 // expires in 24 hours
                 });
                 // return the information including token as JSON
                 res.json({
@@ -97,7 +103,9 @@ router.post('/login', function (req, res) {
                     token: token,
                     userID: user._id,
                     username: user.username
+                    
                 });
+                
             }
 
         }

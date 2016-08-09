@@ -3,7 +3,8 @@ module.exports = function (router, User){
     router.route('/users')
 
     .post(function(req,res){
-
+       
+    
         var user = new User({
             username: req.body.username,
             password: req.body.password,
@@ -22,6 +23,7 @@ module.exports = function (router, User){
                 res.status(200).json({message: 'User created successfully'});
             }
         });
+        
     });
 
     router.route('/users/:username')
