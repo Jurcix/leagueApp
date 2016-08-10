@@ -6,6 +6,8 @@ module.exports = {
         '/login',
         '/login/',
         '/api/builds',
+        '/builds',
+        '/builds/',
         '/builds/:build_id',
         '/api',
         '/'

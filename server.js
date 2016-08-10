@@ -1,3 +1,4 @@
+//~~~~~~~~Required libraries and files~~~~~~~~~~~
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
@@ -7,9 +8,12 @@ var Build = require('./models/builds');
 var User = require('./models/users');
 var jwt = require('jsonwebtoken');
 
+//~~~~~~~~~~~~~~Database setup~~~~~~~~~~~~~~~~~~~
 mongoose.connect(config.database);
 
 app.set('superSecret', config.secret);
+
+//~~~~~~~~~~~~~~Body parser settup~~~~~~~~~~~~~~~
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -17,15 +21,10 @@ app.use(bodyParser.json());
 var port = process.env.PORT || 9001;
 var router = express.Router();
 
+//~~~~~~~~~~~~~~~~~Token setter~~~~~~~~~~~~~~~~~~
 router.use(function (req, res, next) {
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
-console.log(token);
     if (token) {
-
-        var decoded = jwt.decode(token, {complete: true});
-        console.log(decoded.payload._doc._id);
-
-        // verifies secret and checks exp
         jwt.verify(token, app.get('superSecret'), function (err, decoded) {
             if (err) {
                 return res.status(403).send({
@@ -34,24 +33,21 @@ console.log(token);
                     error: err
                 });
             } else {
-                // if everything is good, save to request for use in other routes
                 req.decoded = decoded;
                 next();
             }
         });
     } else if (config.allowedUrls.indexOf(req.url) === -1) {
-        // if there is no token
-        // return an error
         return res.status(403).send({
             success: false,
             message: 'No token provided.'
         });
-
     } else {
-        //if there is no token but api path is allowed through config
         next();
     }
 });
+
+//Show json object when user goes to: "http://localhost:9001/api"
 
 router.get('/', function (req, res) {
     res.json({
@@ -70,9 +66,11 @@ router.get('/', function (req, res) {
     });
 });
 
+//~~~~~~~~~~~~~~~~~Rest files~~~~~~~~~~~~~~~~~~~~~~~~~
 require('./rest/builds.rest.js')(router, Build);
 require('./rest/users.rest.js')(router, User);
 
+//~~~~~~~~~~~~~~~~Login service~~~~~~~~~~~~~~~~~~~~~~~
 router.post('/login', function (req, res) {
     User.findOne({
         username: req.body.username
@@ -85,11 +83,11 @@ router.post('/login', function (req, res) {
         }
 
         if (!user) {
-            res.json({success: false, message: 'Authentication failed. User not found.'});
+            res.json({success: false, message: 'Login failed. User not found.'});
         } else if (user) {
             // check if password matches
             if (user.password != req.body.password) {
-                res.json({success: false, message: 'Authentication failed. Wrong password.'});
+                res.json({success: false, message: 'Login failed. Wrong password.'});
             } else {
                 // if user is found and password is right
                 // create a token
@@ -103,9 +101,9 @@ router.post('/login', function (req, res) {
                     token: token,
                     userID: user._id,
                     username: user.username
-                    
+
                 });
-                
+
             }
 
         }
@@ -113,8 +111,9 @@ router.post('/login', function (req, res) {
     });
 });
 
-
+//~~~~~~~~~~~~sets to use /api before all routes~~~~~~~~
 app.use('/api', router);
+
 app.listen(port);
 var logMessage = 'API is running on: http://localhost:' + port + '/api';
 console.log(logMessage);

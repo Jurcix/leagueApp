@@ -1,19 +1,17 @@
-/**
- * Created by Richard on 8/8/2016.
- */
 var jwt = require('jsonwebtoken');
-
 
 module.exports = function (router, Build) {
     router.route('/createbuild')
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Create a build~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         .post(function (req, res) {
+
+        //~~~~~~~~~~~Sets and decodes token~~~~~~~~~~~~~
             var token = req.body.token || req.query.token || req.headers['x-access-token'];
             var decoded = jwt.decode(token, {complete: true});
             console.log(decoded.payload._doc._id);
 
+            //~~~~Checks if user name matches logged in username~~~~
             if(decoded.payload._doc.username==req.body.username) {
-
                 var build = new Build({
                     name: req.body.name,
                     username: req.body.username,
@@ -32,7 +30,7 @@ module.exports = function (router, Build) {
                 });
             }
             else{
-                res.status(500).json({message: "Niu niu niu, go back to your own profile"});
+                res.status(500).json({message: "Niu niu niu, go back to your own profile (ノಠ益ಠ)ノ"});
             }
         });
     router.route('/builds')
@@ -64,6 +62,7 @@ module.exports = function (router, Build) {
     router.route('/user/builds/:build_id')
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Update build by ID~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         .put(function (req, res) {
+            //~~~~~~~~~~~Sets and decodes token~~~~~~~~~~~~~
             var token = req.body.token || req.query.token || req.headers['x-access-token'];
             var decoded = jwt.decode(token, {complete: true});
 
@@ -71,11 +70,10 @@ module.exports = function (router, Build) {
 
                 Build.findById(req.params.build_id, function (err, build) {
                     if (err) {
-                        console.log('ERROR UPDATING USER: ' + err.errmsg);
+                        console.log('ERROR UPDATING BUILD: ' + err.errmsg);
                         res.status(500).json({error: err});
                         return 0;
                     }
-
                     for (var key in req.body) {
                         build[key] = req.body[key];
                     }
@@ -92,7 +90,7 @@ module.exports = function (router, Build) {
                 });
             }
             else{
-                res.status(500).json({message: "Niu niu niu, go back to your own profile"});
+                res.status(500).json({message: "Niu niu niu, go back to your own profile (ノಠ益ಠ)ノ"});
             }
         })
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Delete a build~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,10 +113,7 @@ module.exports = function (router, Build) {
                 });
             }
             else{
-                res.status(500).json({message: "Niu niu niu, go back to your own profile"});
+                res.status(500).json({message: "Niu niu niu, go back to your own profile (ノಠ益ಠ)ノ"});
             }
-
         });
-
-
 };
