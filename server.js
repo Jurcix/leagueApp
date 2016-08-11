@@ -101,7 +101,6 @@ router.post('/login', function (req, res) {
                     token: token,
                     userID: user._id,
                     username: user.username
-
                 });
 
             }
