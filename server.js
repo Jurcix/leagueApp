@@ -24,6 +24,8 @@ var router = express.Router();
 //~~~~~~~~~~~~~~~~~Token setter~~~~~~~~~~~~~~~~~~
 router.use(function (req, res, next) {
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    var requestUrl = new RegExp(req.url);
+    var configUrl = config.allowedUrls.join();
     if (token) {
         jwt.verify(token, app.get('superSecret'), function (err, decoded) {
             if (err) {
@@ -37,7 +39,7 @@ router.use(function (req, res, next) {
                 next();
             }
         });
-    } else if (config.allowedUrls.indexOf(req.url) === -1) {
+    } else if (requestUrl.test(configUrl) === false) {   // pataisyti!!
         return res.status(403).send({
             success: false,
             message: 'No token provided.'

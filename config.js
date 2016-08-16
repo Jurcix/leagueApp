@@ -15,6 +15,7 @@ module.exports = {
         '/builds/',
         '/builds/:build_id',
         '/api',
-        '/'
+        '/',
+        '/users/user1'
     ]
 };

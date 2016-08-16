@@ -30,16 +30,17 @@ module.exports = function (router, User) {
     router.route('/users/:username')
 
         .get(function (req, res) {
-            User.find({username: req.params.username}, function (err, user) {
+            User.find({username: req.params.username},{username:1, email:1, _id:0}, function (err, user) {
                 if (err) {
                     console.log('ERROR :' + err);
                     res.status(500).json({error: err});
-                } else if (user.username === null){
+                } else if (user.username === null){     //perkelt i front enda
                     console.log ('ERROR');
                     res.status(404).json({message: 'User not found'});
                 } else {
                     console.log('SUCCESS!');
-                    res.status(200).json({message: 'User found successfully', user: user});
+                    res.status(200).json({message: 'User found successfully'});
+                    console.log(user);
                 }
             });
         })
