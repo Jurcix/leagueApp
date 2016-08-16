@@ -7,6 +7,9 @@ var config = require('./config');
 var Build = require('./models/builds');
 var User = require('./models/users');
 var jwt = require('jsonwebtoken');
+var cors = require('cors');
+
+
 
 //~~~~~~~~~~~~~~Database setup~~~~~~~~~~~~~~~~~~~
 mongoose.connect(config.database);
@@ -23,6 +26,11 @@ var router = express.Router();
 
 //~~~~~~~~~~~~~~~~~Token setter~~~~~~~~~~~~~~~~~~
 router.use(function (req, res, next) {
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader("Content-Type", "application/json");
+
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
     var requestUrl = new RegExp(req.url);
     var configUrl = config.allowedUrls.join();
