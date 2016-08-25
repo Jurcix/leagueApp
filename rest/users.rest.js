@@ -39,7 +39,7 @@ module.exports = function (router, User) {
                     res.status(404).json({message: 'User not found'});
                 } else {
                     console.log('SUCCESS!');
-                    res.status(200).json({message: 'User found successfully'});
+                    res.status(200).json({message: 'User found successfully', user:user});
                     console.log(user);
                 }
             });
