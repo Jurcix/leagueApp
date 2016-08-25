@@ -1,4 +1,4 @@
-var jwt = require ('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 module.exports = function (router, User) {
 
     router.route('/users')
@@ -30,21 +30,46 @@ module.exports = function (router, User) {
     router.route('/users/:username')
 
         .get(function (req, res) {
-            User.find({username: req.params.username},{username:1, email:1, _id:0}, function (err, user) {
+            User.find({username: req.params.username}, {username: 1, email: 1, _id: 0}, function (err, user) {
                 if (err) {
                     console.log('ERROR :' + err);
                     res.status(500).json({error: err});
-                } else if (user.username === null){     //perkelt i front enda
-                    console.log ('ERROR');
+                } else if (user.username === null) {     //perkelt i front enda
+                    console.log('ERROR');
                     res.status(404).json({message: 'User not found'});
                 } else {
                     console.log('SUCCESS!');
-                    res.status(200).json({message: 'User found successfully', user:user});
+                    res.status(200).json({message: 'User found successfully', user: user});
                     console.log(user);
                 }
             });
         })
 
+        .post(function (req, res) {
+            User.findOne({
+                username: req.body.username
+            }, function (err, user) {
+
+                if (err) {
+                    console.log('ERROR AUTH USER: ' + err.errmsg);
+                    res.status(403).json({error: err});
+                    return;
+                }
+
+                if (!user) {
+                    res.json({success: false, message: 'Incorrect user'});
+                } else if (user) {
+                    // check if password matches
+                    if (user.password != req.body.password) {
+                        res.json({success: false, message: 'Old password does not match'});
+                    } else {
+                        // return the information including token as JSON
+                        res.json({success: true, message: 'Old password matches'});
+                    }
+                }
+
+            });
+        })
 
         .put(function (req, res) {
             var token = req.body.token || req.query.token || req.headers['x-access-token'];
