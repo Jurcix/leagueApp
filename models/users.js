@@ -5,6 +5,9 @@ var userSchema =  new Schema ({
     username: {type: String, required: true, unique: true},
     password: {type: String, required: true},
     email: {type: String, required: true},
+    oldPassword: {type: String},
+    newPassword: {type: String},
+    repeatPassword: {type: String},
     created_at: Date,
     updated_at: Date
 });

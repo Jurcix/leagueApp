@@ -10,6 +10,9 @@ module.exports = function (router, User) {
                 username: req.body.username,
                 password: req.body.password,
                 email: req.body.email,
+                oldPassword: req.body.oldPassword,
+                newPassword: req.body.newPassword,
+                repeatPassword: req.body.repeatPassword,
                 created_at: req.body.created_at,
                 updated_at: req.body.updated_at
             });
@@ -45,31 +48,6 @@ module.exports = function (router, User) {
             });
         })
 
-        .post(function (req, res) {
-            User.findOne({
-                username: req.body.username
-            }, function (err, user) {
-
-                if (err) {
-                    console.log('ERROR AUTH USER: ' + err.errmsg);
-                    res.status(403).json({error: err});
-                    return;
-                }
-
-                if (!user) {
-                    res.json({success: false, message: 'Incorrect user'});
-                } else if (user) {
-                    // check if password matches
-                    if (user.password != req.body.password) {
-                        res.json({success: false, message: 'Old password does not match'});
-                    } else {
-                        // return the information including token as JSON
-                        res.json({success: true, message: 'Old password matches'});
-                    }
-                }
-
-            });
-        })
 
         .put(function (req, res) {
             var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -77,26 +55,31 @@ module.exports = function (router, User) {
             console.log(decoded.payload._doc._id);
 
             if (decoded.payload._doc.username == req.body.username) {
-                User.find({username: req.params.username}, function (err, user) {
+                User.findOne({username: req.params.username}, function (err, user) {
                     if (err) {
                         console.log('ERROR :' + err);
                         res.status(500).json({error: err});
                         return 0;
-                    }
-
-                    for (var key in req.body) {
-                        user[key] = req.body[key];
-                    }
-
-                    user.save(function (err) {
-                        if (err) {
-                            console.log('ERROR :' + err);
-                            res.status(500).json({error: err});
+                    } else {
+                        if (user.password === req.body.oldPassword) {
+                            if (req.body.newPassword === req.body.repeatPassword) {
+                                user.password = req.body.newPassword;
+                                user.save(function (err) {
+                                    if (err) {
+                                        console.log('ERROR :' + err);
+                                        res.status(500).json({error: err});
+                                    } else {
+                                        console.log('SUCCESS!');
+                                        res.status(200).json({success: 'User updated successfully'});
+                                    }
+                                })
+                            } else {
+                                console.log('Passwords do not match')
+                            }
                         } else {
-                            console.log('SUCCESS!');
-                            res.status(200).json({success: 'User updated successfully'});
+                            console.log('Old password does not match')
                         }
-                    })
+                    }
                 })
             } else {
                 res.status(500).json({message: "Niu niu niu, go back to your own profile (ノಠ益ಠ)ノ"});
