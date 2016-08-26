@@ -12,6 +12,7 @@ var cors = require('cors');
 
 
 //~~~~~~~~~~~~~~Database setup~~~~~~~~~~~~~~~~~~~
+mongoose.Promise = global.Promise;
 mongoose.connect(config.database);
 
 app.set('superSecret', config.secret);
