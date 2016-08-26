@@ -49,22 +49,46 @@ module.exports = function (router, User) {
         })
 
 
+
         .put(function (req, res) {
             var token = req.body.token || req.query.token || req.headers['x-access-token'];
             var decoded = jwt.decode(token, {complete: true});
             console.log(decoded.payload._doc._id);
 
-            if (decoded.payload._doc.username == req.body.username) {
+            if (decoded.payload._doc.username === req.body.username) {
+
                 User.findOne({username: req.params.username}, function (err, user) {
                     if (err) {
                         console.log('ERROR :' + err);
                         res.status(500).json({error: err});
                         return 0;
-                    } else {
-                        if (user.password === req.body.oldPassword) {
-                            if (req.body.newPassword === req.body.repeatPassword) {
-                                user.password = req.body.newPassword;
-                                user.save(function (err) {
+                    }
+                    /*  else {
+
+                     /!* } else if(req.body.email){
+                     user.email = req.body.email;
+                     user.save(function(err){
+                     if (err){
+                     console.log('ERROR :' + err);
+                     res.status(500).json({error: err});
+                     } else {
+                     console.log('SUCCESS!');
+                     res.status(200).json({success: 'User updated successfully'});
+                     }
+                     })
+                     }*!/
+                     }*/
+                    if (user.password === req.body.oldPassword) {
+                        /*  if (req.body.newPassword) {*/
+
+                        if (req.body.newPassword === req.body.repeatPassword) {
+                            user.password = req.body.newPassword;
+                            console.log(JSON.stringify(user, null, 4));
+                            User.update(
+                                {username: req.params.username},
+                                {password: req.body.newPassword},
+                                {multi: false},
+                                function(err){
                                     if (err) {
                                         console.log('ERROR :' + err);
                                         res.status(500).json({error: err});
@@ -72,13 +96,23 @@ module.exports = function (router, User) {
                                         console.log('SUCCESS!');
                                         res.status(200).json({success: 'User updated successfully'});
                                     }
-                                })
-                            } else {
-                                console.log('Passwords do not match')
-                            }
+                                }
+                            )
+                            /* user.markModified('password');
+                             user.save(function (err) {
+                             if (err) {
+                             console.log('ERROR :' + err);
+                             res.status(500).json({error: err});
+                             } else {
+                             console.log('SUCCESS!');
+                             res.status(200).json({success: 'User updated successfully'});
+                             }
+                             })*/
                         } else {
-                            console.log('Old password does not match')
+                            console.log('Passwords do not match')
                         }
+                    } else {
+                        console.log('Old password does not match')
                     }
                 })
             } else {
